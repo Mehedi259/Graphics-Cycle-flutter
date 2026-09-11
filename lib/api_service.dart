@@ -3,12 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class ApiService {
-  // Use 10.0.2.2 for Android emulator, 127.0.0.1 for iOS simulator/desktop
+  // Live Hetzner Server
   static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000';
-    }
-    return 'http://127.0.0.1:8000';
+    return 'http://178.156.229.53:8001';
   }
 
   static Future<File?> translatePdf({
@@ -23,7 +20,15 @@ class ApiService {
     request.fields['target_language'] = targetLang;
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
+    print('================ API CALL ================');
+    print('Endpoint: POST $uri');
+    print('Fields: ${request.fields}');
+    print('Files: ${request.files.map((f) => f.filename).toList()}');
+
     var response = await request.send();
+
+    print('Response Status: ${response.statusCode}');
+    print('==========================================');
 
     if (response.statusCode == 200) {
       return await _saveFile(response, 'translated_${targetLang}.pdf');
@@ -48,7 +53,15 @@ class ApiService {
     request.fields['color'] = colorHex;
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
+    print('================ API CALL ================');
+    print('Endpoint: POST $uri');
+    print('Fields: ${request.fields}');
+    print('Files: ${request.files.map((f) => f.filename).toList()}');
+
     var response = await request.send();
+
+    print('Response Status: ${response.statusCode}');
+    print('==========================================');
 
     if (response.statusCode == 200) {
       return await _saveFile(response, 'watermarked.pdf');
