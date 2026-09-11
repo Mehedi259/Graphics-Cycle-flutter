@@ -27,14 +27,14 @@ class _WatermarkScreenState extends State<WatermarkScreen> {
   ];
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    PlatformFile? result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
 
     if (result != null) {
       setState(() {
-        _selectedFile = File(result.files.single.path!);
+        _selectedFile = File(result.path!);
       });
     }
   }
