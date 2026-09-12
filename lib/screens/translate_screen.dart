@@ -2,38 +2,37 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'api_service.dart';
+import '../services/api_service.dart';
 
-class WatermarkScreen extends StatefulWidget {
-  const WatermarkScreen({super.key});
+class TranslateScreen extends StatefulWidget {
+  const TranslateScreen({super.key});
 
   @override
-  State<WatermarkScreen> createState() => _WatermarkScreenState();
+  State<TranslateScreen> createState() => _TranslateScreenState();
 }
 
-class _WatermarkScreenState extends State<WatermarkScreen>
+class _TranslateScreenState extends State<TranslateScreen>
     with AutomaticKeepAliveClientMixin {
   File? _selectedFile;
-  final TextEditingController _textController =
-      TextEditingController(text: 'CONFIDENTIAL');
-  String _position = 'center';
-  double _opacity = 0.5;
-  Color _currentColor = const Color(0xFFE53935);
+  String _sourceLang = 'en';
+  String _targetLang = 'bn';
   bool _isLoading = false;
 
   @override
   bool get wantKeepAlive => true;
 
-  final List<String> _positions = [
-    'top-left',
-    'top-center',
-    'top-right',
-    'center',
-    'bottom-left',
-    'bottom-center',
-    'bottom-right',
-  ];
+  final Map<String, String> _languages = {
+    'en': 'English',
+    'bn': 'Bengali',
+    'ar': 'Arabic',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'hi': 'Hindi',
+    'zh': 'Chinese',
+    'ja': 'Japanese',
+    'ko': 'Korean',
+  };
 
   Future<void> _pickFile() async {
     PlatformFile? result = await FilePicker.pickFile(
@@ -45,60 +44,21 @@ class _WatermarkScreenState extends State<WatermarkScreen>
     }
   }
 
-  void _pickColor() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Pick Watermark Color',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-        ),
-        content: SingleChildScrollView(
-          child: BlockPicker(
-            pickerColor: _currentColor,
-            onColorChanged: (color) => setState(() => _currentColor = color),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF6C3CE1),
-            ),
-            child: const Text('Done',
-                style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2, 8).toUpperCase()}';
-  }
-
-  Future<void> _applyWatermark() async {
+  Future<void> _translatePdf() async {
     if (_selectedFile == null) {
       _showSnack('Please select a PDF file first.', isError: true);
       return;
     }
-    if (_textController.text.isEmpty) {
-      _showSnack('Please enter watermark text.', isError: true);
-      return;
-    }
     setState(() => _isLoading = true);
     try {
-      File? watermarkedFile = await ApiService.watermarkPdf(
+      File? translatedFile = await ApiService.translatePdf(
         file: _selectedFile!,
-        text: _textController.text,
-        position: _position,
-        opacity: _opacity,
-        colorHex: _colorToHex(_currentColor),
+        sourceLang: _sourceLang,
+        targetLang: _targetLang,
       );
-      if (watermarkedFile != null && mounted) {
-        _showSnack('Watermark applied successfully!', isError: false);
-        OpenFilex.open(watermarkedFile.path);
+      if (translatedFile != null && mounted) {
+        _showSnack('Translation successful! Opening file...', isError: false);
+        OpenFilex.open(translatedFile.path);
       }
     } catch (e) {
       if (mounted) _showSnack('Error: $e', isError: true);
@@ -121,8 +81,7 @@ class _WatermarkScreenState extends State<WatermarkScreen>
             Expanded(child: Text(msg)),
           ],
         ),
-        backgroundColor:
-            isError ? const Color(0xFFE53935) : const Color(0xFF43A047),
+        backgroundColor: isError ? const Color(0xFFE53935) : const Color(0xFF43A047),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -206,7 +165,9 @@ class _WatermarkScreenState extends State<WatermarkScreen>
                                 const Text(
                                   'PDF selected ✓',
                                   style: TextStyle(
-                                      fontSize: 12, color: Color(0xFF6C3CE1)),
+                                    fontSize: 12,
+                                    color: Color(0xFF6C3CE1),
+                                  ),
                                 ),
                               ],
                             ],
@@ -230,13 +191,13 @@ class _WatermarkScreenState extends State<WatermarkScreen>
 
           const SizedBox(height: 16),
 
-          // Watermark Settings Card
+          // Language Selection Card
           _buildCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Watermark Settings',
+                  'Language Settings',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -245,142 +206,52 @@ class _WatermarkScreenState extends State<WatermarkScreen>
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Watermark Text
-                _buildInputField(
-                  controller: _textController,
-                  label: 'Watermark Text',
-                  icon: Icons.text_fields_rounded,
+                _buildDropdown(
+                  label: 'From',
+                  icon: Icons.language_rounded,
+                  value: _sourceLang,
+                  items: _languages,
+                  onChanged: (v) => setState(() => _sourceLang = v!),
                 ),
                 const SizedBox(height: 12),
-
-                // Position
-                _buildPositionDropdown(),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Appearance Card
-          _buildCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Appearance',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6C3CE1),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Opacity
-                Row(
-                  children: [
-                    const Icon(Icons.opacity_rounded,
-                        size: 20, color: Color(0xFF6C3CE1)),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Opacity',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF2D1B69),
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                // Swap icon row
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        final tmp = _sourceLang;
+                        _sourceLang = _targetLang;
+                        _targetLang = tmp;
+                      });
+                    },
+                    child: Container(
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0ECFC),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${(_opacity * 100).round()}%',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF6C3CE1),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6C3CE1), Color(0xFF9B5DFF)],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                SliderTheme(
-                  data: SliderThemeData(
-                    activeTrackColor: const Color(0xFF6C3CE1),
-                    inactiveTrackColor: const Color(0xFFE8E0FF),
-                    thumbColor: const Color(0xFF6C3CE1),
-                    overlayColor: const Color(0x226C3CE1),
-                    trackHeight: 4,
-                    thumbShape:
-                        const RoundSliderThumbShape(enabledThumbRadius: 10),
-                  ),
-                  child: Slider(
-                    value: _opacity,
-                    min: 0.1,
-                    max: 1.0,
-                    divisions: 9,
-                    onChanged: (v) => setState(() => _opacity = v),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Color
-                Row(
-                  children: [
-                    const Icon(Icons.palette_rounded,
-                        size: 20, color: Color(0xFF6C3CE1)),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Color',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF2D1B69),
-                      ),
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: _pickColor,
-                      child: Row(
-                        children: [
-                          Text(
-                            _colorToHex(_currentColor),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6C3CE1),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: _currentColor,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                  color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _currentColor.withOpacity(0.5),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6C3CE1).withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
+                      child: const Icon(Icons.swap_vert_rounded,
+                          color: Colors.white, size: 20),
                     ),
-                  ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildDropdown(
+                  label: 'To',
+                  icon: Icons.translate_rounded,
+                  value: _targetLang,
+                  items: _languages,
+                  onChanged: (v) => setState(() => _targetLang = v!),
                 ),
               ],
             ),
@@ -388,13 +259,13 @@ class _WatermarkScreenState extends State<WatermarkScreen>
 
           const SizedBox(height: 24),
 
-          // Apply Button
+          // Translate Button
           _isLoading
-              ? _buildLoadingCard('Applying watermark...')
+              ? _buildLoadingCard('Translating your PDF with AI...')
               : _buildGradientButton(
-                  label: 'Apply Watermark',
-                  icon: Icons.water_drop_rounded,
-                  onPressed: _applyWatermark,
+                  label: 'Translate PDF',
+                  icon: Icons.translate_rounded,
+                  onPressed: _translatePdf,
                 ),
         ],
       ),
@@ -419,37 +290,13 @@ class _WatermarkScreenState extends State<WatermarkScreen>
     );
   }
 
-  Widget _buildInputField({
-    required TextEditingController controller,
+  Widget _buildDropdown({
     required String label,
     required IconData icon,
+    required String value,
+    required Map<String, String> items,
+    required ValueChanged<String?> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8E0FF)),
-      ),
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF2D1B69),
-        ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFF6C3CE1), size: 20),
-          labelText: label,
-          labelStyle:
-              const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPositionDropdown() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
@@ -459,20 +306,22 @@ class _WatermarkScreenState extends State<WatermarkScreen>
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButtonFormField<String>(
-          value: _position,
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.grid_view_rounded,
-                color: Color(0xFF6C3CE1), size: 20),
-            labelText: 'Position',
-            labelStyle: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
+          value: value,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: const Color(0xFF6C3CE1), size: 20),
+            labelText: label,
+            labelStyle: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF9E9E9E),
+            ),
             border: InputBorder.none,
           ),
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: Color(0xFF6C3CE1)),
-          items: _positions
-              .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+          icon:
+              const Icon(Icons.keyboard_arrow_down, color: Color(0xFF6C3CE1)),
+          items: items.entries
+              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
-          onChanged: (v) => setState(() => _position = v!),
+          onChanged: onChanged,
         ),
       ),
     );

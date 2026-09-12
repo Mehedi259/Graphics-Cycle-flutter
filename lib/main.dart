@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'translate_screen.dart';
-import 'watermark_screen.dart';
+import 'screens/translate_screen.dart';
+import 'screens/watermark_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
