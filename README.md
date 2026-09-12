@@ -15,13 +15,7 @@ A feature-rich Flutter application designed for managing, picking, and processin
 - **Local Storage:** Efficient file saving and access mechanisms using `path_provider`.
 - **Cross-Platform:** Beautiful and responsive UI for both Android and iOS devices.
 
-## Screenshots
 
-| Home | File Picker | Color Picker |
-|:---:|:---:|:---:|
-| <img src="https://via.placeholder.com/250x500.png?text=Home+Screen" width="250"/> | <img src="https://via.placeholder.com/250x500.png?text=File+Picker" width="250"/> | <img src="https://via.placeholder.com/250x500.png?text=Color+Picker" width="250"/> |
-
-*(Note: Replace placeholder images with actual app screenshots)*
 
 ## Getting Started
 
