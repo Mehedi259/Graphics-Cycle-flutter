@@ -1,4 +1,4 @@
-# 🎨 Graphics Cycle
+# Graphics Cycle
 
 A feature-rich Flutter application designed for managing, picking, and processing graphics and files with ease. 
 
@@ -7,15 +7,15 @@ A feature-rich Flutter application designed for managing, picking, and processin
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
-## ✨ Features
+## Features
 
-- **📂 File Management:** Seamlessly pick and open files from your device storage using `file_picker` and `open_filex`.
-- **🎨 Color Picker:** Integrated robust color picking tool for graphic customization using `flutter_colorpicker`.
-- **🌐 Network Requests:** Fast and reliable API integrations via the `http` package.
-- **📁 Local Storage:** Efficient file saving and access mechanisms using `path_provider`.
-- **📱 Cross-Platform:** Beautiful and responsive UI for both Android and iOS devices.
+- **File Management:** Seamlessly pick and open files from your device storage using `file_picker` and `open_filex`.
+- **Color Picker:** Integrated robust color picking tool for graphic customization using `flutter_colorpicker`.
+- **Network Requests:** Fast and reliable API integrations via the `http` package.
+- **Local Storage:** Efficient file saving and access mechanisms using `path_provider`.
+- **Cross-Platform:** Beautiful and responsive UI for both Android and iOS devices.
 
-## 📸 Screenshots
+## Screenshots
 
 | Home | File Picker | Color Picker |
 |:---:|:---:|:---:|
@@ -23,7 +23,7 @@ A feature-rich Flutter application designed for managing, picking, and processin
 
 *(Note: Replace placeholder images with actual app screenshots)*
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine.
 
@@ -53,7 +53,7 @@ Ensure you have the following installed:
    flutter run
    ```
 
-## 🛠️ Tech Stack & Packages
+## Tech Stack & Packages
 
 - **Framework:** [Flutter](https://flutter.dev/)
 - **Language:** [Dart](https://dart.dev/)
@@ -64,10 +64,10 @@ Ensure you have the following installed:
   - `open_filex`
   - `flutter_colorpicker`
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issues, and feature requests are welcome!
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
