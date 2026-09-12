@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ApiService {
@@ -18,7 +19,11 @@ class ApiService {
     
     request.fields['source_language'] = sourceLang;
     request.fields['target_language'] = targetLang;
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    request.files.add(await http.MultipartFile.fromPath(
+      'file', 
+      file.path,
+      contentType: MediaType('application', 'pdf'),
+    ));
 
     print('================ API CALL ================');
     print('Endpoint: POST $uri');
@@ -51,7 +56,11 @@ class ApiService {
     request.fields['position'] = position;
     request.fields['opacity'] = opacity.toString();
     request.fields['color'] = colorHex;
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    request.files.add(await http.MultipartFile.fromPath(
+      'file', 
+      file.path,
+      contentType: MediaType('application', 'pdf'),
+    ));
 
     print('================ API CALL ================');
     print('Endpoint: POST $uri');
